@@ -1,0 +1,36 @@
+{% extends 'shift/base.html' %}
+{% block content %}
+    <div class="container">
+        <h1>ユーザー登録/更新</h1>
+        <p>同一名のユーザーは登録できません。</p>
+
+        <table class="table table-striped">
+
+            {{ form.non_field_errors }}
+            <form action="" method="POST">
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <span class="badge badge-danger">{{ field.errors }}</span>
+                </div>
+                {% endfor %}
+                {% csrf_token %}
+                <div>
+                    <button type="submit" class="btn btn-primary">送信</button>
+                </div>
+            </form>
+        </table>
+        <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-bottom:10px">戻る</a>
+    </div>
+
+    <style>
+        h1 {
+            color: #364e96;/*文字色*/
+            border: solid 3px #364e96;/*線色*/
+            padding: 0.5em;/*文字周りの余白*/
+            border-radius: 0.5em;/*角丸*/
+            margin-top:10px;
+        }
+    </style>
+{% endblock %}

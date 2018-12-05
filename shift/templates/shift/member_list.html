@@ -1,0 +1,37 @@
+{% extends 'shift/base.html' %}
+{% block content %}
+    <div class="container">
+        <h1>ユーザー選択</h1>
+        <p>シフト登録するユーザー名をクリックしてください！</br>以下に存在しない場合は[ユーザー追加]、登録内容の変更は区分をクリック！</p>
+        <a class="btn btn-primary" href="./create" role="button" style="margin-bottom:10px">ユーザー追加</a>
+
+        <!-- トップページでは現在の年をデフォルトで表示する -->
+        {% now 'Y' as year %}
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>名前</th>
+              <th>区分</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in object_list %}
+            <tr>
+                <td><a href="{% url "shift:shift_view" year member.id %}">{{ member.name }}</a></td>
+                <td><a href="{% url "shift:member_update" member.id %}">{{ member.get_division_display }}</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+
+    <style>
+        h1 {
+            color: #364e96;/*文字色*/
+            border: solid 3px #364e96;/*線色*/
+            padding: 0.5em;/*文字周りの余白*/
+            border-radius: 0.5em;/*角丸*/
+            margin-top:10px;
+        }
+    </style>
+{% endblock %}

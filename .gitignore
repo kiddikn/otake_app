@@ -1,0 +1,6 @@
+
+*.vscode
+*.pyc
+Albums/migrations/*
+shift/migrations/*
+db.sqlite3

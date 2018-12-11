@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>大竹アルバム</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="shortcut icon" href="https://otake-slsc.org/patrol/static/admin/img/otake.ico">
+
+    <!-- アルバムフォト表示用 -->
+    <!-- CSSの読み込み -->
+    <link rel="stylesheet" href="https://otake-slsc.org/album/css/main.css">
+    <link rel="stylesheet" href="https://otake-slsc.org/album/css/photoswipe.css"></script>
+    <!-- JavaScriptの読み込み -->
+    <script src="https://otake-slsc.org/album/js/jquery-1.10.2.min.js"></script>
+    <script src="https://otake-slsc.org/album/js/photoswipe.js"></script>
+    <script src="https://otake-slsc.org/album/js/jquery.photoswipe.min.js"></script>
+    <script>
+    ;(function($){
+        $(function(){
+            $('a.swipe').photoSwipe();
+        });
+    })(jQuery);
+    </script>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+    {% block extrajs %}{% endblock %}
+  </body>
+</html>

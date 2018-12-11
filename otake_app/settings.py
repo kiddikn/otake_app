@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,15 +25,15 @@ SECRET_KEY = '%1*hh79frqq@asuui$ky+h$%a8_ic(8cx#0$)7yy$q6=8c)9hh'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = []
-
+#DEBUG = False
+#ALLOWED_HOSTS = ['otake-slsc.org']
 
 # Application definition
 
 INSTALLED_APPS = [
     'shift.apps.ShiftConfig',
-    #'Albums.apps.AlbumsConfig',
+    'albums.apps.AlbumsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -89,6 +90,13 @@ DATABASES = {
     }
 }
 
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -127,6 +135,8 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+#STATIC_URL = '/patrol/static/'
+#STATIC_ROOT = os.path.join('/home/otakeslsc/otake-slsc.org/public_html/patrol', 'static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

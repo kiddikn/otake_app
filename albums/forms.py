@@ -13,7 +13,7 @@ class AlbumForm(forms.ModelForm):
         max_length=50,
         required=True
     )
-    title.widget.attrs.update({'class': 'form-control','placeholder':'20181007全日本大会など'})
+    title.widget.attrs.update({'class': 'form-control','placeholder':'20181007全日本大会や201808パトロールなど'})
 
     owner = forms.CharField(
         label='ユーザー名',

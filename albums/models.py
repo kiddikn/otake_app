@@ -3,8 +3,10 @@ from django.db import models
 class Album(models.Model):
     """ベースとなるアルバム"""
     title = models.CharField("タイトル", max_length=50, unique=True, null=False, blank=False, db_index=True) 
-    owner = models.CharField("作成者", max_length=20, default=0, null=False, blank=False)        
-    created = models.DateTimeField(auto_now=True, db_index=True)                                             
+    owner = models.CharField("作成者", max_length=20, default=0, null=False, blank=False)    
+    photo_num = models.IntegerField("登録画像数", default=0)    
+    created = models.DateTimeField(auto_now_add=True, db_index=True)                                             
+    last_finality = models.DateTimeField(auto_now=True, db_index=True)                                             
 
     # タイトル
     def __str__(self):

@@ -140,3 +140,6 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+# 公開時にはこのパスになる(https://otake-slsc.org/album/media/photos/1/20181212_00001.JPG)
+# MEDIA_PUBLIC_PATH = 'https://otake-slsc.org/album'
+MEDIA_PUBLIC_PATH = ''

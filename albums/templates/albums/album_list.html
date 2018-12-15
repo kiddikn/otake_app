@@ -8,16 +8,18 @@
           <thead class="thead-dark">
             <tr>
               <th>タイトル</th>
-              <th>作成者</th>
-              <th>作成日</th>
+              <th>photo数</th>
+              <th>最終更新</th>
+              <th>修正</th>
             </tr>
           </thead>
           <tbody>
             {% for alb in object_list %}
             <tr>
                 <td><a href={% url "albums:photo" alb.id %}>{{ alb.title }}</a></td>
-                <td>{{ alb.owner }}</td>
-                <td>{{ alb.created|date:"Y/m/d G:i:s" }}</td>
+                <td>{{ alb.photo_num }}</td>
+                <td>{{ alb.last_finality|date:"Y/m/d G:i:s" }}</td>
+                <td><a href={% url "albums:album_update" alb.id %}>変更</a></td>
             </tr>
             {% endfor %}
           </tbody>

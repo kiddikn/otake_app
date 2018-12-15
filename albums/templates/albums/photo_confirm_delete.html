@@ -1,0 +1,18 @@
+{% extends 'albums/base.html' %}
+{% block content %}
+<div class="container">
+    <div class="form-group">
+        <form action="" method="post">{% csrf_token %}
+            <div class="alert alert-warning" role="alert" style="margin-top:10px">
+                <p>Are you sure you want to delete this photo? you cannot be reversed.</p>
+            </div>
+            <img src="{{ object.thumbnail }}" />
+            <div style="margin-top:10px">
+                <input type="submit" class="btn btn-danger" value="削除実行" />
+                <a class="btn btn-primary" href={% url "albums:del_list" object.album_id %} role="button">削除選択</a>
+                <a class="btn btn-primary" href={% url "albums:photo" object.album_id %} role="button">アルバムに戻る</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

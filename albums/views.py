@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Album, Photo
 from .forms import AlbumForm
 from PIL import Image 
@@ -13,9 +13,16 @@ class AlbumView(ListView):
 
     def get_queryset(self):
         """タイトル名の降順"""
-        return self.model.objects.order_by('-title')
+        return self.model.objects.values('id', 'title', 'photo_num', 'last_finality').order_by('-title')
 
 class AlbumCreateView(CreateView):
+    """アルバム追加"""
+    model = Album
+    form_class = AlbumForm
+    template_name = 'albums/album_form.html'
+    success_url = reverse_lazy('albums:album')
+
+class AlbumUpdateView(UpdateView):
     """アルバム追加"""
     model = Album
     form_class = AlbumForm
@@ -41,6 +48,41 @@ class PhotoView(ListView):
         from django.shortcuts import get_object_or_404
         context["title"] = get_object_or_404(Album, pk=title_id) # 指定されたタイトルがない場合は404
         context["album_id"] = title_id
+        return context
+
+class PhotoDeleteView(DeleteView):
+    """photo削除処理"""
+    model = Photo
+    success_url = reverse_lazy('albums:album')
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+            album_id = self.object.album.id
+            self.object.album.photo_num -= 1
+            self.object.album.save()
+            delete_file(get_fullpath(self.object.origin))
+            delete_file(get_fullpath(self.object.thumbnail))
+            result = super().delete(request, *args, **kwargs)    
+            messages.success(self.request, '削除に成功しました。')
+        except Exception as e:
+            messages.error(self.request, '削除に失敗しました。' + e.args)
+        return redirect(reverse_lazy('albums:photo', kwargs={'title':album_id}))
+
+class PhotoDeleteListView(ListView):
+    """削除する画像を選択するための一覧画面"""
+    model = Photo
+    template_name = 'albums/photo_delete_list.html'
+
+    def get_queryset(self):
+        """該当タイトルの画像一覧を返す"""
+        alb_id = self.kwargs.get('album_id')
+        queryset = self.model.objects.filter(album_id=alb_id)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs) # はじめに継承元のメソッドを呼び出す
+        context['album_id'] = self.kwargs.get('album_id')
         return context
 
 def PhotoUpload(request, album_id):
@@ -92,12 +134,16 @@ def PhotoUpload(request, album_id):
         # photo設定  
         photo = Photo()
         photo.album = album         # アルバムID
-        photo.origin = settings.MEDIA_URL + original_url 
+        photo.origin = settings.MEDIA_PUBLIC_PATH + settings.MEDIA_URL + original_url 
         thumbdir,aaa = path.split(photo.origin)
         photo.thumbnail = thumbdir + '/' + thumb_filename
         photo.width, photo.height = im.size  
         photo.editor = request.POST.get('editor')   
         photo.save()
+
+        # アルバムの画像数を加算
+        album.photo_num += 1
+        album.save()
         
         # アクセス権付与
         from os import chmod
@@ -125,7 +171,10 @@ def clean_up_image(org_filepath, THUMBNAIL_WIDTH=800,THUMBNAIL_HEIGHT=600):
             img.thumbnail((THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT), Image.ANTIALIAS)
 
         # EXIF情報から傾きを取得
-        exif = img._getexif()
+        try:
+            exif = img._getexif() # EXIF情報がない場合は落ちる
+        except:
+            exif = None
         orientation = exif.get(0x112, 1) if exif else 1
         rotate, reverse = get_exif_rotation(orientation)
         
@@ -209,6 +258,13 @@ def get_image_path(album_id, filename):
 
     extension = path.splitext(filename)[-1]
     return folder_dir + newfilename + extension
+
+def get_fullpath(relative_path):
+    """/media/photos/1...から/User/.../media/photos/1...のフルパスヘ変換"""
+    from django.conf import settings
+    if relative_path.startswith(settings.MEDIA_PUBLIC_PATH):
+        relative_path = relative_path.replace(settings.MEDIA_PUBLIC_PATH, '')
+    return settings.MEDIA_ROOT + '/' + relative_path.replace(settings.MEDIA_URL, '')  
 
 def get_exif_rotation(orientation_num):
     """

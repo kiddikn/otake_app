@@ -38,15 +38,17 @@
                 {% for photo in object_list %}
                 <div class="imageBox_{{ forloop.counter|divisibleby:'4' |yesno:'last,unit' }} box_{{ forloop.counter0|divisibleby:'2' |yesno:'left,right,left' }}">
                     <p class="image">
-                        <a href="{{ photo.origin }}" data-size="{{ photo.width }}x{{ photo.height }}" class="swipe" rel="group1" title="投稿者:{{ photo.editor }}">
-                            <img src="{{ photo.thumbnail }}" alt="サムネイル" />
-                            <!-- <figcaption>{{ photo.editor }}</figcaption> -->
+                        <a href="{{ top_path }}{{ photo.origin }}" data-size="{{ photo.width }}x{{ photo.height }}" class="swipe" rel="group1" title="投稿者:{{ photo.editor }}">
+                            <img src="{{ top_path }}{{ photo.thumbnail }}" alt="サムネイル" />
+                            <!-- <figcaption>{{ photo.created }}</figcaption> -->
                         </a>
                     </p>
                 </div>
                 {% endfor %}
             </div>
         </div>
+
+        <a class="btn btn-danger" href={% url "albums:del_list" album_id %} role="button">投稿済み画像削除</a>
     </div>
 
     <style>
@@ -59,6 +61,10 @@
     }
 
     button{
+        margin-bottom: 30px;
+    }
+
+    .btn{
         margin-bottom: 30px;
     }
     </style>

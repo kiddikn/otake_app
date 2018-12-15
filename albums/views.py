@@ -5,6 +5,8 @@ from .models import Album, Photo
 from .forms import AlbumForm
 from PIL import Image 
 from django.contrib import messages
+from logging import getLogger
+logger = getLogger(__name__)
 
 class AlbumView(ListView):
     """アルバム表示するビュー"""
@@ -65,8 +67,10 @@ class PhotoDeleteView(DeleteView):
             delete_file(get_fullpath(self.object.thumbnail))
             result = super().delete(request, *args, **kwargs)    
             messages.success(self.request, '削除に成功しました。')
+            logger.info('success file deleted by user ip {}'.format(get_client_ip(request)))
         except Exception as e:
-            messages.error(self.request, '削除に失敗しました。' + e.args)
+            logger.error('PhotoDeleteView fail delete.({}):error({}),ip({})'.format(request, e.args, get_client_ip(request)))
+            messages.error(self.request, '削除に失敗しました。error:{}'.format(e.args))
         return redirect(reverse_lazy('albums:photo', kwargs={'title':album_id}))
 
 class PhotoDeleteListView(ListView):
@@ -94,6 +98,7 @@ def PhotoUpload(request, album_id):
     try:
         album = Album.objects.get(pk=album_id)
     except:
+        logger.warning('None Object is Accessed.ID:{},IP:{}'.format(album_id,get_client_ip(request)))
         messages.warning(request, '選択されたアルバムは存在しません。') 
         return redirect('albums:photo', album_id)
     
@@ -113,6 +118,7 @@ def PhotoUpload(request, album_id):
         org_fullpath = settings.MEDIA_ROOT + '/' + original_url   
         if not clean_up_image(org_fullpath):
             # ImageOpen出来ない場合は、次の画像に映る
+            logger.error('clean up error.IP:({})'.format(get_client_ip(request)))
             delete_file(org_fullpath)
             err_list.append(str(afile))
             continue
@@ -126,6 +132,7 @@ def PhotoUpload(request, album_id):
         # サムネイル作成
         im = Image.open(org_fullpath)
         if not create_thumbnail(im, thumb_fullpath):
+            logger.error('create thumbnail error.IP:({})'.format(get_client_ip(request)))
             delete_file(org_fullpath)
             delete_file(thumb_fullpath)
             err_list.append(str(afile))
@@ -151,6 +158,7 @@ def PhotoUpload(request, album_id):
         chmod(thumb_fullpath, 0o644)
 
     if err_list:
+        logger.error('upload error.File:({}),IP:({})'.format('・'.join(err_list), get_client_ip(request)))
         messages.error(request, '次の画像アップロードに失敗しました。・' + '・'.join(err_list))
     else:
         messages.success(request, '画像のアップロードに成功しました!') 
@@ -173,7 +181,8 @@ def clean_up_image(org_filepath, THUMBNAIL_WIDTH=800,THUMBNAIL_HEIGHT=600):
         # EXIF情報から傾きを取得
         try:
             exif = img._getexif() # EXIF情報がない場合は落ちる
-        except:
+        except Exception as e:
+            logger.warning('No Exif Info.({})'.format(e.args))
             exif = None
         orientation = exif.get(0x112, 1) if exif else 1
         rotate, reverse = get_exif_rotation(orientation)
@@ -194,7 +203,8 @@ def clean_up_image(org_filepath, THUMBNAIL_WIDTH=800,THUMBNAIL_HEIGHT=600):
             dst.save(org_filepath)
 
         return True
-    except:
+    except Exception as e:
+        logger.error('clean up image error.({})'.format(e.args))
         return False
 
 def create_thumbnail(im, dst_file):
@@ -204,7 +214,8 @@ def create_thumbnail(im, dst_file):
         if im_thumb.mode != "RGB":
             im_thumb = im_thumb.convert("RGB") # RGBモードに変換する
         im_thumb.save(dst_file, quality=95)    
-    except:
+    except Exception as e:
+        logger.error('create thumbnail error.({})'.format(e.args))
         return False
     return True
 
@@ -289,11 +300,20 @@ def get_exif_rotation(orientation_num):
     if orientation_num == 8:
         return 90, 0
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 def delete_file(full_path):
     """ファイルを削除"""
     from os import path, remove
     if path.exists(full_path):
         try:
             remove(full_path)
-        except:
+        except Exception as e:
+            logger.error('File Delete Error.({})'.format(e.args))
             pass

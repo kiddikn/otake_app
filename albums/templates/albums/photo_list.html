@@ -68,4 +68,14 @@
         margin-bottom: 30px;
     }
     </style>
+
+    <script>
+    $("form").submit(function() {
+    var self = this;
+    $(":submit", self).prop("disabled", true);
+    setTimeout(function() {
+        $(":submit", self).prop("disabled", false);
+    }, 10000);
+    });
+    </script>
 {% endblock %}

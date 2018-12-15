@@ -5,3 +5,4 @@ Albums/migrations/*
 shift/migrations/*
 db.sqlite3
 media/*
+*.log

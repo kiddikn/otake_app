@@ -1,0 +1,49 @@
+{% extends 'shift/base.html' %}
+{% block content %}
+    <div class="container">
+        <a href="javascript:void(0);" onclick="window.history.back();">戻る</a>
+        {% for keydate,allshift in allshift.items %}
+          <h1>{{keydate}}</h1>
+          <ul>
+              {% for shift in allshift %}
+              <li>{{shift.get_shift_display }} {{ shift.name }}</li>
+              {% endfor %}
+          </ul>
+        {% endfor %}
+    </div>
+
+    <style>
+        h1 {
+            color: #364e96;/*文字色*/
+            border: solid 3px #364e96;/*線色*/
+            padding: 0.5em;/*文字周りの余白*/
+            border-radius: 0.5em;/*角丸*/
+            margin-top:10px;
+        }
+        ul, ol{
+          padding: 0;
+        }
+        ul li {
+          position: relative;
+          list-style-type: none!important;/*ポチ消す*/
+          padding: 0.5em 0.5em 0.5em 0.5em;
+          margin-bottom: 5px;
+          line-height: 1.5;
+          background: #dbebf8;
+          vertical-align: middle;
+          color: #505050;
+          border-radius: 15px 0px 0px 15px;/*左側の角丸く*/
+        }
+        ul li:before{ /*疑似要素*/
+          display:inline-block;
+          vertical-align: middle;
+          /*以下白丸つくる*/
+          content:'';
+          width:1em;
+          height: 1em;
+          background: #fff;
+          border-radius: 50%;
+          margin-right: 8px;
+        }
+    </style>
+{% endblock %}

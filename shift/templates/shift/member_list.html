@@ -1,23 +1,27 @@
 {% extends 'shift/base.html' %}
 {% block content %}
     <div class="container">
+        {% now 'Y' as year %}  
         <h1>ユーザー選択</h1>
-        <p>シフト登録するユーザー名をクリックしてください！</br>以下に存在しない場合は[ユーザー追加]、登録内容の変更は区分をクリック！</p>
+        <p>以下に存在しない場合は[ユーザー追加]、登録内容の変更は区分をクリック！</p>
         <a class="btn btn-primary" href="./create" role="button" style="margin-bottom:10px">ユーザー追加</a>
+        <a class="btn btn-primary" href="{% url "shift:all_shift_member" year %}" role="button" style="margin-bottom:10px">シフト一覧</a>
 
         <!-- トップページでは現在の年をデフォルトで表示する -->
-        {% now 'Y' as year %}
+        
         <table class="table table-striped">
           <thead class="thead-dark">
             <tr>
               <th>名前</th>
+              <th>操作</th>
               <th>区分</th>
             </tr>
           </thead>
           <tbody>
             {% for member in object_list %}
             <tr>
-                <td><a href="{% url "shift:shift_view" year member.id %}">{{ member.name }}</a></td>
+                <td>{{ member.name }}</td>
+                <td><a href="{% url "shift:shift_view" year member.id %}">シフト</a>/<a href="https://densuke.biz/list?cd=DWHybGW9AnZhDeUT">食事</a></td>
                 <td><a href="{% url "shift:member_update" member.id %}">{{ member.get_division_display }}</a></td>
             </tr>
             {% endfor %}

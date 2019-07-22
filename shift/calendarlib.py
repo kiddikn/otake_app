@@ -31,9 +31,8 @@ SCHEDULE_LINK_AND_NUM = """
 """
 
 POPUP_A_TAG = """
-    <a href="javascript:void(0);"
-    class='square_btn'
-    onclick="window.open('{0}','subwin','width=500,height=500');">
+    <a href="{0}"
+    class='square_btn'>
         >> {1}
     </a>
 """

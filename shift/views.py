@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Count
 from django.utils.safestring import mark_safe
 from django.views.generic import ListView, CreateView, UpdateView, TemplateView, FormView, View
+from collections import OrderedDict
 from .calendarlib import PatrolCalendar
 from .forms import MemberForm
 from .models import Patrol,Member,Shift,SHIFT_TYPE
@@ -55,6 +56,38 @@ class ShiftMemberView(ListView):
         context["shift_now"] = "{0:%Y年%m月%d日のシフト}".format(self.get_date())
         return context
 
+class AllShiftMemberView(TemplateView):
+    """全スケジュールの一覧ビュー.
+    """
+
+    model = Shift
+    template_name = "shift/all_shift_member.html"
+
+    def _get_start_date(self):
+        year = self.kwargs.get('year')
+        return  datetime.datetime(year=int(year), month=7, day=1)
+
+    def _get_end_date(self):
+        year = self.kwargs.get('year')
+        return  datetime.datetime(year=int(year), month=8, day=31)
+
+    def get_context_data(self, *args, **kwargs):
+        """その日付のスケジュールを返す."""
+        start = self._get_start_date()
+        end = self._get_end_date()
+        queryset = self.model.objects.filter(shift_date__range = [start,end])\
+                                     .exclude(shift=0)\
+                                     .order_by('shift_date','shift','name_id')
+        allshift=OrderedDict()
+        for query in queryset:
+            if query.shift_date not in allshift:
+                allshift[query.shift_date]=[]    
+            allshift[query.shift_date].append(query)
+
+        context = super().get_context_data(*args, **kwargs)
+        context['allshift'] = allshift
+        return context
+
 class ShiftCreateView(TemplateView):
     """カレンダーにてシフトを登録する"""
     model = Shift
@@ -79,7 +112,12 @@ class ShiftCreateView(TemplateView):
         #    year = datetime.datetime.now()
         start=1
         end=31
-        pat_conf = Patrol.objects.filter(year=year)[0]
+        try:
+            pat_conf = Patrol.objects.filter(year=year)[0]
+            start=pat_conf.start
+            end=pat_conf.end
+        except:
+            pass
 
         ########################################################
         # 人数集計
@@ -98,7 +136,7 @@ class ShiftCreateView(TemplateView):
         queryset7 = self.model.objects.filter(
             name_id=user, shift_date__year=year, shift_date__month=7
         )
-        month7_calendar = self.get_calendar(int(year),7,shift_num,queryset7,SHIFT_TYPE,start=pat_conf.start)
+        month7_calendar = self.get_calendar(int(year),7,shift_num,queryset7,SHIFT_TYPE,start=start)
         month7_calendar_html = month7_calendar.formatmonth()
 
         ########################################################
@@ -107,7 +145,7 @@ class ShiftCreateView(TemplateView):
         queryset8 = self.model.objects.filter(
             name_id=user, shift_date__year=year, shift_date__month=8
         )
-        month8_calendar = self.get_calendar(int(year),8,shift_num,queryset8,SHIFT_TYPE,end=pat_conf.end)
+        month8_calendar = self.get_calendar(int(year),8,shift_num,queryset8,SHIFT_TYPE,end=end)
         month8_calendar_html = month8_calendar.formatmonth()
 
         # mark_safeでhtmlがエスケープされないようにする

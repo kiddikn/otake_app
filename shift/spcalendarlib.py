@@ -11,18 +11,12 @@ from .models import Shift
 CalendarClass = LocaleHTMLCalendar
 
 DAY_HTML = """
-<td class="{0} back{1} shift_day" id="cal-{2}" >
-    <p class="dayname">{3}</p>
+<td class="{0} back{1} shift_day" id="cal-{2}" month="{3}">
+    <p class="dayname">{4}</p>
 </td>
 """
 
 SHIFT_WORK = "<label><input class='myshift' type='radio' value={0} name='{1}' {2} onClick=\"col_{0}('cal-{1}')\">{3}</input></label>"
-
-SCHEDULE_LINK_AND_NUM = """
-<a href="{0}">
-    <span class="badge badge-primary">+{1}</span>
-</a>
-"""
 
 POPUP_A_TAG = """
     <a href="{0}" class="btn-square">シフトメンバー</a>
@@ -78,6 +72,7 @@ class SpPatrolCalendar(CalendarClass):
             css_class,
             myshift_id,
             now,
+            month,
             day
         )
 
@@ -88,16 +83,16 @@ class SpPatrolCalendar(CalendarClass):
 
         # 登録されているシフトごとの集計と合計人数を表示
         now = datetime.date(year, month, day)
-        shift_detail = ''
+        shift_detail = '※登録メンバー数<br/>'
         shift_sum = 0
         a_tag = ''
         for list in self.shift_reg:
             if list['shift_date'] == now:
-                shift_detail += '</br>■{}→{}人'.format(list['shift'],list['cnt'])
+                shift_detail += '■{}→{}人<br/>'.format(list['shift'],list['cnt'])
                 shift_sum += list['cnt']
         # シフト登録されている場合、合計とメンバーリストへのリンクを作成
         if shift_detail != '':
-            shift_detail += '<hr/>合計→{}人'.format(shift_sum)
+            shift_detail += '<hr class="center"/>合計→{}人'.format(shift_sum)
             # 日付クリックで詳しいメンバー表示させる
             a_tag = POPUP_A_TAG.format(
                 self.get_shift_member_url(year, month, day)
@@ -111,7 +106,7 @@ class SpPatrolCalendar(CalendarClass):
                 break
 
         #登録用のフォームを作成
-        shift_input='<div class="shift_reg_table" id="reg-{}" style="display:none;"><p class="myshiftday">{}</p>'.format(now,day)
+        shift_input='<div class="shift_reg_table month{}" id="reg-{}"><p class="myshiftday">{}<button type="button" class="close">&times;</button></p>'.format(month,now,day)
         shift_input+='<table class="form_all">'
         shift_input+='<tr>'
         shift_input+='<td class="form_half">'
@@ -136,6 +131,7 @@ class SpPatrolCalendar(CalendarClass):
         # shift_input+='<input type="checkbox" class="myshift" name={}>朝</input>'.format(now)
         # shift_input+='<input type="checkbox" class="myshift" name={}>昼</input>'.format(now)
         # shift_input+='<input type="checkbox" class="myshift" name={}>夜</input>'.format(now)
+        # shift_input+='<hr class="center">'
         shift_input+=shift_detail
         shift_input+='<br/>'
         shift_input+=a_tag
@@ -150,7 +146,7 @@ class SpPatrolCalendar(CalendarClass):
         if day == 0:
             return '<td class="noday" id="noday">&nbsp;</td>'  # day outside month
         elif day < self.start or self.end < day:
-            return '<td class="{}" id="noshift"><p class="dayname">{}</p></td>'.format(self.cssclasses[weekday],day)
+            return '<td class="{0}" id="noshift{1}" month="{1}"><p class="dayname">{2}</p></td>'.format(self.cssclasses[weekday],self.month,day)
         else:
             day_html = self.create_month_day(
                 self.year, self.month, day,
@@ -195,7 +191,7 @@ class SpPatrolCalendar(CalendarClass):
                     continue
                 else:
                     a(self.formatreg(self.year,self.month,day))
-        a('<div class="shift_reg" id="reg-noshift" style="display:none;">パトロール期間ではありません</div>')
+        a('<div class="shift_reg_table month{0}" id="reg-noshift{0}"><p>パトロール期間ではありません<button type="button" class="close">&times;</button></p></div>'.format(self.month))
         a('\n')
         return ''.join(v)
 

@@ -82,12 +82,16 @@ td.form_half {
 td.to_shift_member{
     vertical-align: bottom;
 }
+hr.center {
+    margin: 5px 0;
+}
 .btn-square {
   display: inline-block;
   padding: 0.5em 1em;
   text-decoration: none;
   background: #668ad8;/*ボタン色*/
   color: #FFF;
+  border-top: solid 4px #627295;
   border-bottom: solid 4px #627295;
   border-radius: 3px;
   margin-top: 10px 0px;
@@ -101,16 +105,20 @@ td.to_shift_member{
 
 /* ラジオボタン　*/
 .shift_reg_table {
-	width: 100%;
-	/* text-align: left; */
+    position: fixed;
+    z-index: 1400;
+}
+div.month7 {
+    bottom:-9999px;
+}
+div.month8 {
+    top:-9999px;
 }
 div.shift_reg_table {
     padding: 0.5em;
-    margin-bottom: 0.5em;
     font-weight: bold;
     background: #FFF;
     border: solid 3px #258;
-    border-radius: 10px;
 }
 .shift_reg ul {
 	padding: 0;
@@ -162,34 +170,20 @@ div.shift_reg_table {
 	border-color: #da3c41;
 }
 
-/* 警告表示 */
-#reg-noshift {
-    position: relative;
-    border: 3px double #da4033;
-    border-radius: 5px;
-    margin: 20px 0;
-    padding: 20px 10px 10px 10px;
-}
-#reg-noshift::before {
-    content: "エラー";
-    position: absolute;
-    background-color: #ffffff;
-    color: #da4033;
-    font-weight: bold;
-    left: 20px;
-    top: -23px;
-    padding: 10px;
+/* エラー表示 */
+#reg-noshift7, #reg-noshift8{
+    height:200px;
+    border: 3px solid #da4033;
 }
 </style>
     <div class="container">
         <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px;margin-bottom:10px;">戻る</a>
+        <p>日付をクリックしてシフトを登録！</p>
         <form action="{% url 'shift:shift_reg' %}" method="POST">
-            <div class="table-responsive scroll-box">
-                <input type='hidden' name='user' value={{ user }}></input>
-                {{ calendar7 }}
-                {{ calendar8 }}
-                {% csrf_token %}
-            </div>
+            <input type='hidden' name='user' value={{ user }}></input>
+            {{ calendar7 }}
+            {{ calendar8 }}
+            {% csrf_token %}
             <button type="submit" class="btn btn-primary">送信</button>
         </form>
         <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px;margin-bottom:10px;">戻る</a>
@@ -211,7 +205,7 @@ function col_4(id) {
    document.getElementById(id).style.backgroundColor = '#ff9999';
 }
 $(".month td").on("click",function(){
-	var td_id = $(this).attr('id');
+	let td_id = $(this).attr('id');
 
     // 日付の指定がない日は処理をしない
     if (td_id == 'noday' || td_id == null) return;
@@ -220,9 +214,28 @@ $(".month td").on("click",function(){
     // カレンダーの選択された日付にハイライト
     $("[id^=cal-]").children('p').removeClass('highlightday');
     $("#cal-" + td_id).children('p').addClass('highlightday');
-    // 登録用のラジオボタンフォームを追加
-    $("[id^=reg-]").css('display','none');
-	$("#reg-" + td_id).css('display','block');
+    
+    // 対象の月を取得
+    $(".month7").css('bottom','-9999px');
+    $(".month8").css('top','-9999px');
+    let month = $(this).attr('month');
+    if(month == 7){
+        // 登録用のラジオボタンフォームを追加
+        $("#reg-" + td_id).css('bottom','0px');
+    }else if(month == 8){
+        // 登録用のラジオボタンフォームを追加
+        $("#reg-" + td_id).css('top','0px');
+    }
 })
+// $(window).scroll(function() {
+//     $(".month7").css('bottom','-9999px');
+//     $(".month8").css('top','-9999px');
+// });
+$( function() {
+    $('.close').click( function () {
+        $(".month7").css('bottom','-9999px');
+        $(".month8").css('top','-9999px');
+    } );
+} );
 </script>
 {% endblock %}

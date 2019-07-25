@@ -1,0 +1,228 @@
+{% extends 'shift/base.html' %}
+{% block content %}
+<style>
+.html {
+    font-size: 8px;
+}
+.body{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.table {
+    table-layout: fixed;
+    width: 100%;
+	word-break: break-all;
+}
+td {
+    font-size:12px;
+    text-align: center;
+    vertical-align: center;
+    padding: 0%;
+}
+th {
+    font-size:13px;
+    text-align: center;
+    vertical-align: center;
+}
+th.month {
+    color: #fff;
+    padding: 8px 15px;
+    background: #258;
+    background:-moz-linear-gradient(rgba(34,85,136,0.7), rgba(34,85,136,0.9) 50%);
+    background:-webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(34,85,136,0.7)), to(rgba(34,85,136,0.9)));
+    font-weight: bold;
+    border-left:1px solid #258;
+    border-top:1px solid #258;
+    border-bottom:1px solid #258;
+    line-height: 120%;
+    text-align: left;
+    text-shadow:0 -1px 0 rgba(34,85,136,0.9);
+    box-shadow: 0px 1px 1px rgba(255,255,255,0.3) inset;
+}
+p.dayname {
+    margin: 0%;
+}
+p.highlightday{
+    background: linear-gradient(transparent 60%, #66ccff 60%);
+}
+td.back0 {
+    background:#ffffef;
+}
+td.back1 {
+    background:#ccff99;
+}
+td.back2 {
+    background:#ffcc99;
+}
+td.back3 {
+    background:#9999ff;
+}
+td.back4 {
+    background:#ff9999;
+}
+
+/* ラジオボタンラベル */
+p.myshiftday{
+    padding: 0;
+    margin: 0;
+}
+p.myshiftday:after{
+    content:"日";
+}
+
+/* フォーム行 */
+table.form_all {
+    width:100%;
+}
+td.form_half {
+    width:50%;
+    text-align: left;
+}
+td.to_shift_member{
+    vertical-align: bottom;
+}
+.btn-square {
+  display: inline-block;
+  padding: 0.5em 1em;
+  text-decoration: none;
+  background: #668ad8;/*ボタン色*/
+  color: #FFF;
+  border-bottom: solid 4px #627295;
+  border-radius: 3px;
+  margin-top: 10px 0px;
+}
+.btn-square:active {
+  /*ボタンを押したとき*/
+  -webkit-transform: translateY(4px);
+  transform: translateY(4px);/*下に動く*/
+  border-bottom: none;/*線を消す*/
+}
+
+/* ラジオボタン　*/
+.shift_reg_table {
+	width: 100%;
+	/* text-align: left; */
+}
+div.shift_reg_table {
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    background: #FFF;
+    border: solid 3px #258;
+    border-radius: 10px;
+}
+.shift_reg ul {
+	padding: 0;
+	list-style: none;
+    margin: 0;
+    text-align: left;
+}
+.shift_reg .list_item {
+	margin: 0;
+	padding: 0;
+}
+.shift_reg label {
+	line-height: 135%;
+	position: relative;
+	margin: 0.5rem;
+	cursor: pointer;
+}
+.shift_reg .myshift {
+	position: relative;
+	margin: 0 1rem 0 0;
+	cursor: pointer;
+}
+.shift_reg .myshift:before,
+.shift_reg .myshift:after {
+	position: absolute;
+	z-index: 1;
+	top: -0.125rem;
+	left: -0.125rem;
+	width: 1rem;
+	height: 1rem;
+	content: '';
+	-webkit-transition: all 0.3s ease-in-out;
+	        transition: all 0.3s ease-in-out;
+	border-radius: 50%;
+	background: #ffffff;
+}
+.shift_reg .myshift:after {
+	z-index: 0;
+	top: -0.25rem;
+	left: -0.25rem;
+	width: 1.25rem;
+	height: 1.25rem;
+	background: #da3c41;
+}
+.shift_reg .myshift:checked:before {
+	-webkit-transform: scale(0, 0);
+	        transform: scale(0, 0);
+	border-width: 0.625rem;
+	border-color: #da3c41;
+}
+
+/* 警告表示 */
+#reg-noshift {
+    position: relative;
+    border: 3px double #da4033;
+    border-radius: 5px;
+    margin: 20px 0;
+    padding: 20px 10px 10px 10px;
+}
+#reg-noshift::before {
+    content: "エラー";
+    position: absolute;
+    background-color: #ffffff;
+    color: #da4033;
+    font-weight: bold;
+    left: 20px;
+    top: -23px;
+    padding: 10px;
+}
+</style>
+    <div class="container">
+        <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px;margin-bottom:10px;">戻る</a>
+        <form action="{% url 'shift:shift_reg' %}" method="POST">
+            <div class="table-responsive scroll-box">
+                <input type='hidden' name='user' value={{ user }}></input>
+                {{ calendar7 }}
+                {{ calendar8 }}
+                {% csrf_token %}
+            </div>
+            <button type="submit" class="btn btn-primary">送信</button>
+        </form>
+        <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px;margin-bottom:10px;">戻る</a>
+    </div>
+<script>
+function col_0(id) {
+   document.getElementById(id).style.backgroundColor = '#ffffef';
+}
+function col_1(id) {
+   document.getElementById(id).style.backgroundColor = '#ccff99';
+}
+function col_2(id) {
+   document.getElementById(id).style.backgroundColor = '#ffcc99';
+}
+function col_3(id) {
+   document.getElementById(id).style.backgroundColor = '#9999ff';
+}
+function col_4(id) {
+   document.getElementById(id).style.backgroundColor = '#ff9999';
+}
+$(".month td").on("click",function(){
+	var td_id = $(this).attr('id');
+
+    // 日付の指定がない日は処理をしない
+    if (td_id == 'noday' || td_id == null) return;
+    
+    td_id=td_id.replace('cal-','');
+    // カレンダーの選択された日付にハイライト
+    $("[id^=cal-]").children('p').removeClass('highlightday');
+    $("#cal-" + td_id).children('p').addClass('highlightday');
+    // 登録用のラジオボタンフォームを追加
+    $("[id^=reg-]").css('display','none');
+	$("#reg-" + td_id).css('display','block');
+})
+</script>
+{% endblock %}

@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from django.views.generic import ListView, CreateView, UpdateView, TemplateView, FormView, View
 from collections import OrderedDict
 from .calendarlib import PatrolCalendar
+from .spcalendarlib import SpPatrolCalendar
 from .forms import MemberForm
 from .models import Patrol,Member,Shift,SHIFT_TYPE
 
@@ -179,3 +180,65 @@ def ShiftReg(request):
         return redirect(reverse_lazy('shift:shift_view', kwargs={'u_id':user,'year':now.year}))
     else:
         pass
+
+class SpShiftCreateView(TemplateView):
+    """カレンダーにてシフトを登録する"""
+    model = Shift
+    template_name = 'shift/sp/calendar.html'
+
+    def get_calendar(self, *args, **kwagrs):
+        return SpPatrolCalendar(*args, **kwagrs)
+
+    def get_context_data(self, *args, **kwargs):
+        """カレンダーオブジェクトをcontextに追加する."""
+        year = self.kwargs.get('year')
+        user = self.kwargs.get('u_id')
+
+        # 開始・終了日付を設定
+        start=1
+        end=31
+        try:
+            # 管理画面でパトロール期間を定義されている場合は、その範囲で作成
+            pat_conf = Patrol.objects.filter(year=year)[0]
+            start=pat_conf.start
+            end=pat_conf.end
+        except:
+            pass
+
+        ########################################################
+        # 人数集計
+        ########################################################
+        shift_num = self.model.objects.filter(shift_date__year=year)\
+                                      .exclude(shift = 0)\
+                                      .values('shift_date','shift')\
+                                      .annotate(cnt=Count(1))
+        for query in shift_num:
+            query['shift'] = self.model(shift=query['shift']).get_shift_display()
+
+        ########################################################
+        # 7月カレンダーの表示
+        ########################################################
+        # データの取得(パトロール用なので手間を省くため7,8月only)
+        queryset7 = self.model.objects.filter(
+            name_id=user, shift_date__year=year, shift_date__month=7
+        )
+        month7_calendar = self.get_calendar(int(year),7,shift_num,queryset7,SHIFT_TYPE,start=start)
+        month7_calendar_html = month7_calendar.formatmonth()
+
+        ########################################################
+        # 8月カレンダーの表示
+        ########################################################
+        queryset8 = self.model.objects.filter(
+            name_id=user, shift_date__year=year, shift_date__month=8
+        )
+        month8_calendar = self.get_calendar(int(year),8,shift_num,queryset8,SHIFT_TYPE,end=end)
+        month8_calendar_html = month8_calendar.formatmonth()
+
+        # mark_safeでhtmlがエスケープされないようにする
+        context = super().get_context_data(*args, **kwargs)
+        context['calendar7'] = mark_safe(month7_calendar_html)
+        context['calendar8'] = mark_safe(month8_calendar_html)
+        context['shift_num'] = shift_num
+        context['user'] = user
+
+        return context

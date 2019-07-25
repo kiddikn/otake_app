@@ -74,6 +74,7 @@ div.back4 {
 }
 </style>
     <div class="container">
+        <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px;margin-bottom:10px;">戻る</a>
         <form action="{% url 'shift:shift_reg' %}" method="POST">
             <div class="table-responsive scroll-box">
                 <input type='hidden' name='user' value={{ user }}></input>
@@ -83,7 +84,7 @@ div.back4 {
             </div>
             <button type="submit" class="btn btn-primary">送信</button>
         </form>
-        <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px">戻る</a>
+        <a class="btn btn-info" href="{% url 'shift:member' %}" role="button" style="margin-top:10px;margin-bottom:10px;">戻る</a>
     </div>
 <script>
 function col_0(id) {

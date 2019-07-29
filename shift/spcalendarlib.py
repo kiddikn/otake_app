@@ -19,7 +19,8 @@ DAY_HTML = """
 SHIFT_WORK = "<label><input class='myshift' type='radio' value={0} name='{1}' {2} onClick=\"col_{0}('cal-{1}')\">{3}</input></label>"
 
 POPUP_A_TAG = """
-    <a href="{0}" class="btn-square">シフトメンバー</a>
+    <a href="{0}" class="btn-square">シフトメンバー確認</a>
+    <button type="submit" class="btn btn-primary" style="margin-top:5px;">送信</button>
 """
 
 class SpPatrolCalendar(CalendarClass):
@@ -91,8 +92,9 @@ class SpPatrolCalendar(CalendarClass):
                 shift_detail += '■{}→{}人<br/>'.format(list['shift'],list['cnt'])
                 shift_sum += list['cnt']
         # シフト登録されている場合、合計とメンバーリストへのリンクを作成
+        # 合計は計算方法によって不明なので削除
         if shift_detail != '':
-            shift_detail += '<hr class="center"/>合計→{}人'.format(shift_sum)
+            # shift_detail += '<hr class="center"/>合計→{}人'.format(shift_sum)
             # 日付クリックで詳しいメンバー表示させる
             a_tag = POPUP_A_TAG.format(
                 self.get_shift_member_url(year, month, day)

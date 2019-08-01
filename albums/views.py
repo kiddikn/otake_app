@@ -12,6 +12,7 @@ class AlbumView(ListView):
     """アルバム表示するビュー"""
     model = Album
     template_name = 'albums/album_list.html'
+    paginate_by=10
 
     def get_queryset(self):
         """タイトル名の降順"""

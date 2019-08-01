@@ -20,7 +20,7 @@ SHIFT_WORK = "<label><input class='myshift' type='radio' value={0} name='{1}' {2
 
 POPUP_A_TAG = """
     <a href="{0}" class="btn-square">シフトメンバー確認</a>
-    <button type="submit" class="btn btn-primary" style="margin-top:5px;">送信</button>
+    <button type="submit" class="btn btn-primary" style="margin-top:5px;">登録</button>
 """
 
 class SpPatrolCalendar(CalendarClass):

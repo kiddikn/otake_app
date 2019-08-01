@@ -19,8 +19,8 @@ DAY_HTML = """
 SHIFT_WORK = "<label><input class='myshift' type='radio' value={0} name='{1}' {2} onClick=\"col_{0}('cal-{1}')\">{3}</input></label>"
 
 POPUP_A_TAG = """
-    <a href="{0}" class="btn-square">シフトメンバー確認</a>
-    <button type="submit" class="btn btn-primary" style="margin-top:5px;">登録</button>
+    <a href="{0}" class="btn-square" style="margin-bottom:5px;">シフトメンバー確認</a>
+    <button type="submit" class="btn btn-primary">登録</button>
 """
 
 class SpPatrolCalendar(CalendarClass):
@@ -93,12 +93,14 @@ class SpPatrolCalendar(CalendarClass):
                 shift_sum += list['cnt']
         # シフト登録されている場合、合計とメンバーリストへのリンクを作成
         # 合計は計算方法によって不明なので削除
-        if shift_detail != '':
-            # shift_detail += '<hr class="center"/>合計→{}人'.format(shift_sum)
-            # 日付クリックで詳しいメンバー表示させる
-            a_tag = POPUP_A_TAG.format(
-                self.get_shift_member_url(year, month, day)
-            )
+        if shift_sum==0:
+            shift_detail += "登録なし<br/>"
+
+        # shift_detail += '<hr class="center"/>合計→{}人'.format(shift_sum)
+        # 日付クリックで詳しいメンバー表示させる
+        a_tag = POPUP_A_TAG.format(
+            self.get_shift_member_url(year, month, day)
+        )
 
         # 現在登録されているシフトをcheckにするため取得する
         myshift_id = 0
@@ -135,7 +137,6 @@ class SpPatrolCalendar(CalendarClass):
         # shift_input+='<input type="checkbox" class="myshift" name={}>夜</input>'.format(now)
         # shift_input+='<hr class="center">'
         shift_input+=shift_detail
-        shift_input+='<br/>'
         shift_input+=a_tag
         shift_input+='</td>'
         shift_input+='</tr>'

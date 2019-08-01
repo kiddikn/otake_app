@@ -5,7 +5,7 @@
         <h1>ユーザー選択</h1>
         <p>以下に存在しない場合は[ユーザー追加]、登録内容の変更は区分をクリック！</p>
         <a class="btn btn-primary" href="./create" role="button" style="margin-bottom:10px">ユーザー追加</a>
-        <a class="btn btn-primary" href="{% url "shift:all_shift_member" year %}" role="button" style="margin-bottom:10px">シフト一覧</a>
+        <a class="btn btn-primary" href="{% url "shift:all_shift_member" year %}#{%now 'Y-m-d'%}" role="button" style="margin-bottom:10px">シフト一覧</a>
 
         <!-- トップページでは現在の年をデフォルトで表示する -->
         

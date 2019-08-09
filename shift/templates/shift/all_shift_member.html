@@ -6,7 +6,11 @@
           <h1 id="{{keydate|date:'Y-m-d'}}">{{keydate}}</h1>
           <ul>
               {% for shift in allshift %}
-              <li>{{shift.get_shift_display }} {{ shift.name }}</li>
+              <li><p class="shifttype">{{shift.get_shift_display }}</p> <p class="shiftname">{{ shift.name }}</p> 
+                {% if shift.comment is not None and shift.comment != "" %}
+                  <p class="shiftcomment">{{shift.comment}}</p>
+                {% endif %}
+                </li>
               {% endfor %}
           </ul>
         {% endfor %}
@@ -44,6 +48,26 @@
           background: #fff;
           border-radius: 50%;
           margin-right: 8px;
+        }
+
+        p.shifttype{
+          display: inline;
+          font-weight: bold;
+        }
+
+        p.shifttype::after{
+          content: ":";
+        }
+
+        p.shiftname{
+          display: inline;
+        }
+
+        p.shiftcomment{
+          font-size: 0.7rem;
+          margin:0 0 0 1.5rem;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
         }
     </style>
 {% endblock %}

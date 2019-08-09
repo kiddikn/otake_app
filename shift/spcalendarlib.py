@@ -16,7 +16,13 @@ DAY_HTML = """
 </td>
 """
 
-SHIFT_WORK = "<label><input class='myshift' type='radio' value={0} name='{1}' {2} onClick=\"col_{0}('cal-{1}')\">{3}</input></label>"
+SHIFT_WORK = """
+<label>
+    <input class='myshift' type='radio' value={0} name='shift:{1}' {2} onClick=\"col_{0}('cal-{1}')\">
+        {3}{4}
+    </input>
+</label>
+"""
 
 POPUP_A_TAG = """
     <a href="{0}" class="btn-square" style="margin-bottom:5px;">シフトメンバー確認</a>
@@ -50,6 +56,7 @@ class SpPatrolCalendar(CalendarClass):
 
     def create_month_day(self, year, month, day, css_class):
         """月間カレンダーの日付部分のhtmlを作成する.
+           単純に日付とシフトの色を設定する。
 
         引数:
             year: 年
@@ -82,32 +89,34 @@ class SpPatrolCalendar(CalendarClass):
         シフト登録対象日をクリックすることで表示するようにする。
         """
 
-        # 登録されているシフトごとの集計と合計人数を表示
+        # 登録されているシフトごとの集計人数の表示と合計人数を計算
         now = datetime.date(year, month, day)
-        shift_detail = '※登録メンバー数<br/>'
-        shift_sum = 0
-        a_tag = ''
+        # 各シフトの人数を記憶
+        shift_num={}
         for list in self.shift_reg:
             if list['shift_date'] == now:
-                shift_detail += '■{}→{}人<br/>'.format(list['shift'],list['cnt'])
-                shift_sum += list['cnt']
-        # シフト登録されている場合、合計とメンバーリストへのリンクを作成
-        # 合計は計算方法によって不明なので削除
-        if shift_sum==0:
-            shift_detail += "登録なし<br/>"
-
-        # shift_detail += '<hr class="center"/>合計→{}人'.format(shift_sum)
-        # 日付クリックで詳しいメンバー表示させる
+                shift_num[list['shift']]=list['cnt']
+        
+        # 当日シフトメンバー表示用のaタグと登録ボタンを設定
         a_tag = POPUP_A_TAG.format(
             self.get_shift_member_url(year, month, day)
         )
 
         # 現在登録されているシフトをcheckにするため取得する
         myshift_id = 0
+        comment=""
         for me in self.user_shift:
             if me.shift_date == now:
                 myshift_id = me.shift
+                # TODO:mealを取得
+
+                # コメントデータを取得
+                if me.comment is not None and me.comment!="":
+                    comment = me.comment
                 break
+        
+        # TODO:mealの状態に合わせてチェックボックスのチェック状態を設定する
+        
 
         #登録用のフォームを作成
         shift_input='<div class="shift_reg_table month{}" id="reg-{}"><p class="myshiftday">{}<button type="button" class="close">&times;</button></p>'.format(month,now,day)
@@ -118,25 +127,40 @@ class SpPatrolCalendar(CalendarClass):
         shift_input+='<ul>'
         for stype in self.shift_type:
             shift_input+='<li class="list_item">'
+            
+            # シフトのチェック状態制御
             check = ''
             if stype[0] == myshift_id:
                 check = "checked='checked'"
+            
+            # シフト登録済み人数の表示
+            shift_disp_num=''
+            if stype[1] in shift_num.keys() and shift_num[stype[1]]>0:
+                shift_disp_num="({}人)".format(shift_num[stype[1]])
+
+            # inputラジオボタンを設定
             shift_input+=SHIFT_WORK.format(
                         stype[0],
                         now,
                         check,
-                        stype[1]
+                        stype[1],
+                        shift_disp_num
                     )
             shift_input+='</li>'
         shift_input+='</ul>'
+        if len(shift_num.keys())>0:
+            shift_input+="<p class='numexplain'>※()内は登録済み人数</p>"
+        # shift_input+='<hr class="center">'
         shift_input+='</div>'
         shift_input+='</td>'
         shift_input+='<td class="form_half to_shift_member">'
         # shift_input+='<input type="checkbox" class="myshift" name={}>朝</input>'.format(now)
         # shift_input+='<input type="checkbox" class="myshift" name={}>昼</input>'.format(now)
         # shift_input+='<input type="checkbox" class="myshift" name={}>夜</input>'.format(now)
-        # shift_input+='<hr class="center">'
-        shift_input+=shift_detail
+        shift_input+='<div class="form-group">'
+        shift_input+='<label for="mycomment">コメント:</label>'
+        shift_input+='<textarea class="form-control mycomment" name="comment:{}" rows="2" placeholder="送迎可。東京発18:00以降。など。" style="font-size:0.7rem;" maxlength="120">{}</textarea>'.format(now, comment)
+        shift_input+='</div>'
         shift_input+=a_tag
         shift_input+='</td>'
         shift_input+='</tr>'

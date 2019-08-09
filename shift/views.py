@@ -48,7 +48,6 @@ class ShiftMemberView(ListView):
         """その日付のスケジュールを返す."""
         date = self.get_date()
         queryset = self.model.objects.filter(shift_date=date)\
-                                     .exclude(shift=0)\
                                      .order_by('shift')
         return queryset
 
@@ -77,7 +76,6 @@ class AllShiftMemberView(TemplateView):
         start = self._get_start_date()
         end = self._get_end_date()
         queryset = self.model.objects.filter(shift_date__range = [start,end])\
-                                     .exclude(shift=0)\
                                      .order_by('shift_date','shift','name_id')
         allshift=OrderedDict()
         for query in queryset:
@@ -160,26 +158,40 @@ class ShiftCreateView(TemplateView):
 
 def ShiftReg(request):
     """カレンダーにてシフトを登録する"""
-    if request.method == "POST":
-        # u_id→ユーザーモデルを取る
-        user = request.POST['user']
-        member = Member.objects.get(id=user)
+    # POST以外は対象外
+    if request.method != "POST":
+        return
 
-        for k,v in request.POST.items():
-            if k == 'csrfmiddlewaretoken' or k == 'user':
-                continue
-            if v == '0' or v == 0:
-                Shift.objects.filter(name=user, shift_date=k).delete()
+    # u_id→ユーザーモデルを取る
+    user = request.POST['user']
+    member = Member.objects.get(id=user)
 
-            else:
-                shiftdata,created = Shift.objects.get_or_create(name=member, shift_date=k)
-                shiftdata.shift = v
-                shiftdata.save()
-            now = datetime.datetime.strptime(k, '%Y-%m-%d')
+    # POSTデータを収集
+    reg_info={}
+    for k,v in request.POST.items():
+        if k == 'csrfmiddlewaretoken' or k == 'user' or ":" not in k:
+            continue
+        
+        reg_type,date=k.split(":")
+        if date not in reg_info.keys():
+            shiftdata,created = Shift.objects.get_or_create(name=member, shift_date=date)
+            reg_info[date]=shiftdata
 
-        return redirect(reverse_lazy('shift:shift_view', kwargs={'u_id':user,'year':now.year}))
-    else:
-        pass
+        if reg_type == "shift":
+            reg_info[date].shift = v
+        elif reg_type == "comment":
+            reg_info[date].comment = v.strip()
+        now = datetime.datetime.strptime(date, '%Y-%m-%d')
+
+    # 収集データをDB登録
+    for regdate,regdata in reg_info.items():
+        # TODO:データがあるかないかの判定をmodelに移譲
+        if (regdata.shift!='0' and regdata.shift!=0) or (regdata.comment is not None and regdata.comment!=""):
+            regdata.save()
+        else:
+            regdata.delete()
+
+    return redirect(reverse_lazy('shift:shift_view', kwargs={'u_id':user,'year':now.year}))
 
 class SpShiftCreateView(TemplateView):
     """カレンダーにてシフトを登録する"""

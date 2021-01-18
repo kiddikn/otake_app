@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Album, Photo
 from .forms import AlbumForm
-from PIL import Image 
+from PIL import Image
 from django.contrib import messages
 from logging import getLogger
 logger = getLogger(__name__)

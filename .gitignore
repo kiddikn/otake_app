@@ -7,3 +7,4 @@ db.sqlite3
 media/*
 *.log
 settings.py
+.python-version

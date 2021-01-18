@@ -1,4 +1,4 @@
-Django==2.0.4
+Django==2.2.13
 django-fastcgi-server==0.1
 flup==1.0.3
 protobuf==3.14.0

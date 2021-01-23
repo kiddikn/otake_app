@@ -36,6 +36,9 @@ class Shift(models.Model):
     shift_date = models.DateField()                                         # シフト登録日付
     shift = models.IntegerField("シフト",default=0,choices=SHIFT_TYPE)      # シフト区分番号
     comment = models.CharField(max_length=200,null=True,blank=True)         # コメント(NULL可)
+    morning = models.BooleanField("朝食", default=False)
+    lunch = models.BooleanField("昼食", default=False)
+    dinner = models.BooleanField("夜食", default=False)  
 
     class Meta:
         unique_together = (("name", "shift_date"),)                         # 名前と日付でユニークにする
@@ -51,6 +54,7 @@ class Patrol(models.Model):
     start = models.IntegerField("パトロール開始日(7月)",default=1)         # 始まり
     end = models.IntegerField("パトロール最終日(8月)",default=31)          # 終わり
     update_finality = models.DateTimeField(auto_now=True)             # 更新日付
+    notify_days = models.IntegerField("変更通知適用日数", default=-1)
 
     # 名前
     def __str__(self):
